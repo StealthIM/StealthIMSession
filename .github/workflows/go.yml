@@ -124,7 +124,10 @@ jobs:
         pip install grpcio-tools==1.72.0rc1 # 解决版本问题
         pip install grpclib
         pip install mypy_protobuf
-        pip install mypy-protobuf
+        sudo pip install grpcio==1.72.0rc1
+        sudo pip install grpcio-tools==1.72.0rc1 # 解决版本问题
+        sudo pip install grpclib
+        sudo pip install mypy_protobuf
           
         echo -e '#!/usr/bin/python\nfrom grpclib.plugin.main import main\nimport sys\nsys.exit(main())' > /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-grpclib_python
         echo -e '#!/usr/bin/python\nfrom mypy_protobuf.main import main\nimport sys\nsys.exit(main())' > /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-mypy
