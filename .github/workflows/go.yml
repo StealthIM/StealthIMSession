@@ -54,23 +54,55 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: StealthIMDB
-        path: ./bin/StealthIMDB
+        path: ./bin/StealthIMSession
           
     - name: Upload artifacts 2 
       uses: actions/upload-artifact@v4
       with:
-        name: StealthIMDB.exe
-        path: ./bin/StealthIMDB.exe
+        name: StealthIMSession.exe
+        path: ./bin/StealthIMSession.exe
           
     - name: Upload artifacts 3
       uses: actions/upload-artifact@v4
       with:
         name: StealthIMDB.docker.zst
-        path: ./bin/StealthIMDB.docker.zst
-
-  upload-package:
+        path: ./bin/StealthIMSession.docker.zst
+  
+  run-test:
     runs-on: ubuntu-latest
     needs: release
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create dir
+      run: |
+        mkdir bin -p
+
+    - name: Download File
+      uses: actions/download-artifact@v4
+      with:
+        name: StealthIMSession
+        path: bin
+
+    - name: Set up Python 3.13.2
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.13.2'
+
+    - name: Install dependencies
+      run: |
+        pip install pytest pytest-asyncio
+
+    - name: Run Test
+      run: |
+        cd test
+        bash ./run
+  
+  upload-package:
+    runs-on: ubuntu-latest
+    needs: run-test
     permissions:
       packages: write
 
@@ -84,10 +116,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y zstd
-        zstd -d StealthIMDB.docker.zst
+        zstd -d StealthIMSession.docker.zst
 
     - name: Load Docker image
-      run: docker load -i StealthIMDB.docker
+      run: docker load -i StealthIMSession.docker
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
@@ -98,5 +130,5 @@ jobs:
 
     - name: Tag and push Docker image
       run: |
-        docker tag $(docker images -q | head -n 1) ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimdb-app:latest
-        docker push ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimdb-app:latest
+        docker tag $(docker images -q | head -n 1) ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimsession-app:latest
+        docker push ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimsession-app:latest
