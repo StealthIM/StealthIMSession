@@ -53,24 +53,100 @@ jobs:
     - name: Upload artifacts 1
       uses: actions/upload-artifact@v4
       with:
-        name: StealthIMDB
-        path: ./bin/StealthIMDB
+        name: StealthIMSession
+        path: ./bin/StealthIMSession
           
     - name: Upload artifacts 2 
       uses: actions/upload-artifact@v4
       with:
-        name: StealthIMDB.exe
-        path: ./bin/StealthIMDB.exe
+        name: StealthIMSession.exe
+        path: ./bin/StealthIMSession.exe
           
     - name: Upload artifacts 3
       uses: actions/upload-artifact@v4
       with:
-        name: StealthIMDB.docker.zst
-        path: ./bin/StealthIMDB.docker.zst
-
-  upload-package:
+        name: StealthIMSession.docker.zst
+        path: ./bin/StealthIMSession.docker.zst
+  
+  run-test:
     runs-on: ubuntu-latest
     needs: release
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: wMTs5aXwfjndimtT
+          MYSQL_DATABASE: test_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:6.0
+        env:
+          REDIS_PASSWORD: wMTs5aXwfjndimtT
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create dir
+      run: |
+        mkdir bin -p
+
+    - name: Download File
+      uses: actions/download-artifact@v4
+      with:
+        name: StealthIMSession
+        path: bin
+
+    - name: Set up Python 3.13.2
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13.2'
+
+    - name: Install dependencies
+      run: |
+        sudo pip install pytest pytest-asyncio
+        export PATH="$PATH:~/.local/bin:/opt/hostedtoolcache/Python/3.13.2/x64/bin"
+        pip install grpcio==1.72.0rc1
+        pip install grpcio-tools==1.72.0rc1 # 解决版本问题
+        pip install grpclib
+        pip install mypy_protobuf
+        sudo pip install grpcio==1.72.0rc1
+        sudo pip install grpcio-tools==1.72.0rc1 # 解决版本问题
+        sudo pip install grpclib
+        sudo pip install mypy_protobuf
+          
+        echo -e '#!/usr/bin/python\nfrom grpclib.plugin.main import main\nimport sys\nsys.exit(main())' > /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-grpclib_python
+        echo -e '#!/usr/bin/python\nfrom mypy_protobuf.main import main\nimport sys\nsys.exit(main())' > /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-mypy
+        chmod +x /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-grpclib_python
+        chmod +x /opt/hostedtoolcache/Python/3.13.2/x64/bin/protoc-gen-mypy
+  
+    - name: Build proto
+      run: |
+        export PATH="$PATH:~/.local/bin:/opt/hostedtoolcache/Python/3.13.2/x64/bin"
+        sudo make debug_proto
+        
+    - name: Run Test
+      run: |
+        cd test
+        sudo bash ./run
+  
+  upload-package:
+    runs-on: ubuntu-latest
+    needs: run-test
     permissions:
       packages: write
 
@@ -78,16 +154,16 @@ jobs:
     - name: Download File
       uses: actions/download-artifact@v4
       with:
-        name: StealthIMDB.docker.zst
+        name: StealthIMSession.docker.zst
 
     - name: Unpack File
       run: |
         sudo apt-get update
         sudo apt-get install -y zstd
-        zstd -d StealthIMDB.docker.zst
+        zstd -d StealthIMSession.docker.zst
 
     - name: Load Docker image
-      run: docker load -i StealthIMDB.docker
+      run: docker load -i StealthIMSession.docker
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
@@ -98,5 +174,5 @@ jobs:
 
     - name: Tag and push Docker image
       run: |
-        docker tag $(docker images -q | head -n 1) ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimdb-app:latest
-        docker push ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimdb-app:latest
+        docker tag $(docker images -q | head -n 1) ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimsession-app:latest
+        docker push ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')/stealthimsession-app:latest
