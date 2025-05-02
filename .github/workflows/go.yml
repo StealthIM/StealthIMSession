@@ -125,8 +125,9 @@ jobs:
         sudo pip install grpclib
         sudo pip install mypy_protobuf
   
-    - name: Install dependencies
+    - name: Build proto
       run: |
+        export PATH="$PATH:~/.local/bin:/opt/hostedtoolcache/Python/3.13.2/x64/bin"
         make debug_proto
         
     - name: Run Test
