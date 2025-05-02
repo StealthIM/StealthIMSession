@@ -137,12 +137,12 @@ jobs:
     - name: Build proto
       run: |
         export PATH="$PATH:~/.local/bin:/opt/hostedtoolcache/Python/3.13.2/x64/bin"
-        make debug_proto
+        sudo make debug_proto
         
     - name: Run Test
       run: |
         cd test
-        bash ./run
+        sudo bash ./run
   
   upload-package:
     runs-on: ubuntu-latest
