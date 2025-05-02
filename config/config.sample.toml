@@ -1,0 +1,19 @@
+[grpc]
+host = "127.0.0.1" # GRPC地址
+port = 50054       # GRPC监听端口
+log = false        # 启用日志，调试功能，上线建议关闭
+
+[dbgateway]
+host = "127.0.0.1"
+port = 50051
+conn_num = 5
+sql_timeout = 5000 # 单位：ms
+
+[cache]
+mem_timeout = 60    # 单位 s
+mem_maxsize = 100   # 单位 KB
+mem_cleantime = 360 # 单位 s
+
+[session]
+expire_hours = 24   # 会话有效期（小时）
+clean_interval = 60 # 清理间隔（分钟）

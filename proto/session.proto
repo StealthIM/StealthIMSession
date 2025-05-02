@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package StealthIM.Session;
+
+option go_package = "StealthIM.Session";
+option java_package = "com.StealthIM.Proto.Session";
+option java_outer_classname = "Session";
+option csharp_namespace = "StealthIM.Proto.Session";
+option java_multiple_files = true;
+
+service StealthIMSession {
+  rpc Ping(PingRequest) returns (Pong);
+  rpc Set(SetRequest) returns (SetResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Del(DelRequest) returns (DelResponse);
+  rpc Reload(ReloadRequest) returns (ReloadResponse);
+}
+
+message PingRequest {}
+message Pong {}
+
+message Result {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message SetRequest { int32 uid = 1; }
+message SetResponse {
+  Result result = 1;
+  string session = 2;
+}
+
+message GetRequest { string session = 1; }
+message GetResponse {
+  Result result = 1;
+  int32 uid = 2;
+}
+
+message DelRequest { string session = 1; }
+message DelResponse { Result result = 1; }
+
+message ReloadRequest {}
+message ReloadResponse { Result result = 1; }

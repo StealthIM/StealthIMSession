@@ -1,0 +1,10 @@
+StealthIM.DBGateway
+StealthIM.Session
+bin
+config.toml
+__debug*
+cfg
+.pytest_cache
+__pycache__
+*_grpc.py*
+*_pb2.py*

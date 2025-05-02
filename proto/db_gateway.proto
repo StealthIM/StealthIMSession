@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package StealthIM.DBGateway;
+
+option go_package = "StealthIM.DBGateway";
+option java_package = "com.StealthIM.Proto.DBGateway";
+option java_outer_classname = "DBGateway";
+option csharp_namespace = "StealthIM.Proto.DBGateway";
+option java_multiple_files = true;
+
+service StealthIMDBGateway {
+  rpc Ping(PingRequest) returns (Pong);
+  rpc Mysql(SqlRequest) returns (SqlResponse);
+  rpc RedisGet(RedisGetStringRequest) returns (RedisGetStringResponse);
+  rpc RedisBGet(RedisGetBytesRequest) returns (RedisGetBytesResponse);
+  rpc RedisSet(RedisSetStringRequest) returns (RedisSetResponse);
+  rpc RedisBSet(RedisSetBytesRequest) returns (RedisSetResponse);
+  rpc RedisDel(RedisDelRequest) returns (RedisDelResponse);
+}
+
+message PingRequest {}
+message Pong {}
+
+message Result {
+  int32 code = 1;
+  string msg = 2;
+}
+
+enum SqlDatabases {
+  Users = 0;
+  Msg = 1;
+  File = 2;
+  Logging = 3;
+  Groups = 4;
+  Masterdb = 5;
+  Session = 6;
+};
+
+message SqlRequest {
+  string sql = 1;
+  SqlDatabases db = 2;
+  repeated InterFaceType params = 3;
+  bool commit = 4;
+  bool get_row_count = 5;
+  bool get_last_insert_id = 6;
+}
+
+message InterFaceType {
+  oneof response {
+    string str = 1;
+    int32 int32 = 2;
+    int64 int64 = 3;
+    bool bool = 4;
+    float float = 5;
+    double double = 6;
+    bytes blob = 7;
+  }
+  bool null = 8;
+}
+
+message SqlLine { repeated InterFaceType result = 1; }
+
+message SqlResponse {
+  Result result = 1;
+  int64 rows_affected = 2;
+  int64 last_insert_id = 3;
+  repeated SqlLine data = 4;
+}
+
+message RedisGetStringRequest {
+  int32 DBID = 1;
+  string key = 2;
+}
+message RedisGetStringResponse {
+  int32 DBID = 1;
+  Result result = 2;
+  string value = 3;
+}
+message RedisGetBytesRequest {
+  int32 DBID = 1;
+  string key = 2;
+}
+message RedisGetBytesResponse {
+  int32 DBID = 1;
+  Result result = 2;
+  bytes value = 3;
+}
+message RedisSetStringRequest {
+  int32 DBID = 1;
+  string key = 2;
+  string value = 3;
+  int32 ttl = 4;
+}
+message RedisSetBytesRequest {
+  int32 DBID = 1;
+  string key = 2;
+  bytes value = 3;
+  int32 ttl = 4;
+}
+message RedisSetResponse { Result result = 1; }
+message RedisDelRequest {
+  int32 DBID = 1;
+  string key = 2;
+}
+message RedisDelResponse { Result result = 1; }

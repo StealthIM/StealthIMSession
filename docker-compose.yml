@@ -1,0 +1,8 @@
+services:
+  app:
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./cfg:/app/config
