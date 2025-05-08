@@ -86,12 +86,13 @@ func (sc *SessionCleaner) cleanExpiredSessions() {
 	// 构建SQL查询，删除所有过期的会话
 	sqlQuery := fmt.Sprintf("DELETE FROM session_db WHERE created_at < '%s'", formattedTime)
 
-	// 使用 START TRANSACTION 和 COMMIT 将查询挂到后台
-	backgroundQuery := fmt.Sprintf("START TRANSACTION; %s; COMMIT;", sqlQuery)
+	// 使用 CREATE EVENT 将查询挂到后台
+	backgroundQuery := fmt.Sprintf("CREATE EVENT one_time_session_cleanup ON SCHEDULE AT CURRENT_TIMESTAMP DO %s;", sqlQuery)
 
 	sqlReq := &pb.SqlRequest{
-		Sql: backgroundQuery,
-		Db:  pb.SqlDatabases_Session,
+		Sql:    backgroundQuery,
+		Db:     pb.SqlDatabases_Session,
+		Commit: true,
 	}
 
 	// 执行SQL
