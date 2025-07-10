@@ -5,6 +5,7 @@ import (
 	"StealthIMSession/autoclean"
 	"StealthIMSession/cache"
 	"StealthIMSession/config"
+	"StealthIMSession/errorcode"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -32,7 +33,7 @@ func (s *server) Set(ctx context.Context, in *pb.SetRequest) (*pb.SetResponse, e
 	if err != nil {
 		return &pb.SetResponse{
 			Result: &pb.Result{
-				Code: 1,
+				Code: errorcode.ServerInternalComponentError,
 				Msg:  "Failed to generate session",
 			},
 		}, nil
@@ -43,7 +44,7 @@ func (s *server) Set(ctx context.Context, in *pb.SetRequest) (*pb.SetResponse, e
 	if err != nil {
 		return &pb.SetResponse{
 			Result: &pb.Result{
-				Code: 2,
+				Code: errorcode.ServerInternalComponentError,
 				Msg:  "Failed to save session",
 			},
 		}, nil
@@ -51,7 +52,7 @@ func (s *server) Set(ctx context.Context, in *pb.SetRequest) (*pb.SetResponse, e
 
 	return &pb.SetResponse{
 		Result: &pb.Result{
-			Code: 0,
+			Code: errorcode.Success,
 			Msg:  "",
 		},
 		Session: sessionID,
@@ -67,7 +68,7 @@ func (s *server) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, e
 	if err != nil {
 		return &pb.GetResponse{
 			Result: &pb.Result{
-				Code: 1,
+				Code: errorcode.SessionNotFoundError,
 				Msg:  "Session not found",
 			},
 		}, nil
@@ -75,7 +76,7 @@ func (s *server) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, e
 
 	return &pb.GetResponse{
 		Result: &pb.Result{
-			Code: 0,
+			Code: errorcode.Success,
 			Msg:  "",
 		},
 		Uid: uid,
@@ -91,7 +92,7 @@ func (s *server) Del(ctx context.Context, in *pb.DelRequest) (*pb.DelResponse, e
 	if err != nil {
 		return &pb.DelResponse{
 			Result: &pb.Result{
-				Code: 1,
+				Code: errorcode.ServerInternalComponentError,
 				Msg:  "Failed to delete session",
 			},
 		}, nil
@@ -99,7 +100,7 @@ func (s *server) Del(ctx context.Context, in *pb.DelRequest) (*pb.DelResponse, e
 
 	return &pb.DelResponse{
 		Result: &pb.Result{
-			Code: 0,
+			Code: errorcode.Success,
 			Msg:  "",
 		},
 	}, nil
@@ -114,7 +115,7 @@ func (s *server) Reload(ctx context.Context, in *pb.ReloadRequest) (*pb.ReloadRe
 
 	return &pb.ReloadResponse{
 		Result: &pb.Result{
-			Code: 0,
+			Code: errorcode.Success,
 			Msg:  "",
 		},
 	}, nil

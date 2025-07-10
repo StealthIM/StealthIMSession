@@ -83,7 +83,7 @@ class SessionClient:
             code = response.result.code
             session = response.session
 
-            if code == 0:
+            if code == 800:
                 self.session_id = session  # 存储会话ID
                 logger.info(f"设置会话成功: UID={uid}, 会话ID={session}")
             else:
@@ -116,7 +116,7 @@ class SessionClient:
             code = response.result.code
             uid = response.uid
 
-            if code == 0:
+            if code == 800:
                 logger.info(f"获取会话成功: 会话ID={session_id}, UID={uid}")
             else:
                 logger.warning(
@@ -147,7 +147,7 @@ class SessionClient:
 
             code = response.result.code
 
-            if code == 0:
+            if code == 800:
                 logger.info(f"删除会话成功: 会话ID={session_id}")
                 # 如果删除的是当前会话，清除存储的会话ID
                 if session_id == self.session_id:
@@ -178,7 +178,7 @@ class SessionClient:
 
             code = response.result.code
 
-            if code == 0:
+            if code == 800:
                 logger.info("重新加载服务配置成功")
             else:
                 logger.warning(
@@ -225,7 +225,7 @@ async def run_quick_test(host: str = "localhost", port: int = 50054) -> None:
             set_result = await client.set_session(uid)
             print(f"设置会话结果: 状态码={set_result[0]}, 会话ID={set_result[1]}")
 
-            if set_result[0] == 0:
+            if set_result[0] == 800:
                 session_id = set_result[1]
 
                 # 测试获取会话

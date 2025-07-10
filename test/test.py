@@ -17,24 +17,24 @@ pytestmark = pytest.mark.asyncio
 
 # 测试数据 - 根据实际行为调整预期值
 SET_SESSION_CASES = [
-    pytest.param(123, 0, id="normal_user"),
-    pytest.param(0, 0, id="zero_user_id"),
-    pytest.param(-1, 0, id="negative_user_id"),  # 服务允许负数UID
-    pytest.param(999999999, 0, id="large_user_id"),
+    pytest.param(123, 800, id="normal_user"),
+    pytest.param(0, 800, id="zero_user_id"),
+    pytest.param(-1, 800, id="negative_user_id"),  # 服务允许负数UID
+    pytest.param(999999999, 800, id="large_user_id"),
 ]
 
 GET_SESSION_CASES = [
     # (session_id, 预期状态码, 预期uid)
-    pytest.param("valid_session", 0, 123, id="valid_session"),
-    pytest.param("invalid_session", 1, 0, id="invalid_session"),  # 状态码为1
-    pytest.param("", 1, 0, id="empty_session"),  # 状态码为1
+    pytest.param("valid_session", 800, 123, id="valid_session"),
+    pytest.param("invalid_session", 1301, 0, id="invalid_session"),  # 状态码为1
+    pytest.param("", 1301, 0, id="empty_session"),  # 状态码为1
 ]
 
 DELETE_SESSION_CASES = [
     # (session_id, 预期状态码)
-    pytest.param("valid_session", 0, id="delete_valid_session"),
-    pytest.param("invalid_session", 0, id="delete_invalid_session"),
-    pytest.param("", 0, id="delete_empty_session"),  # 服务返回0
+    pytest.param("valid_session", 800, id="delete_valid_session"),
+    pytest.param("invalid_session", 800, id="delete_invalid_session"),
+    pytest.param("", 800, id="delete_empty_session"),  # 服务返回0
 ]
 
 # 多轮会话测试场景 - 根据实际行为调整预期值
@@ -44,10 +44,10 @@ SESSION_LIFECYCLE_SCENARIOS = [
         "normal_lifecycle",
         123,
         [
-            ("set", 0),       # 设置会话成功
-            ("get", 0),       # 获取会话成功
-            ("delete", 0),    # 删除会话成功
-            ("get", 1)        # 获取已删除会话失败，状态码为1
+            ("set", 800),       # 设置会话成功
+            ("get", 800),       # 获取会话成功
+            ("delete", 800),    # 删除会话成功
+            ("get", 1301)        # 获取已删除会话失败，状态码为1
         ],
         id="normal_ lifecycle"
     ),
@@ -55,11 +55,11 @@ SESSION_LIFECYCLE_SCENARIOS = [
         "set_twice_delete_once",
         456,
         [
-            ("set", 0),       # 第一次设置会话成功
-            ("set", 0),       # 第二次设置另一个会话成功
-            ("delete", 0),    # 删除第二个会话成功
-            ("get", 0),       # 获取第一个会话成功（服务行为是仍能获取第一个会话）
-            ("get", 0)        # 获取第一个会话成功
+            ("set", 800),       # 第一次设置会话成功
+            ("set", 800),       # 第二次设置另一个会话成功
+            ("delete", 800),    # 删除第二个会话成功
+            ("get", 800),       # 获取第一个会话成功（服务行为是仍能获取第一个会话）
+            ("get", 800)        # 获取第一个会话成功
         ],
         id="set_twice_delete_once"
     ),
@@ -67,17 +67,17 @@ SESSION_LIFECYCLE_SCENARIOS = [
         "multiple_user_sessions",
         789,
         [
-            ("set", 0),             # 为用户789设置会话1
-            ("get", 0),             # 获取会话1成功
-            ("set_with_uid", 0, 101),     # 为用户101设置会话2
-            ("get", 0),             # 获取会话1成功
-            ("switch", 0, 1),       # 切换到会话2，参数为索引
-            ("get", 0),             # 获取会话2成功
-            ("delete", 0),          # 删除会话2
-            ("switch", 0, 0),       # 切换回会话1，参数为索引
-            ("get", 0),             # 获取会话1成功
-            ("delete", 0),          # 删除会话1
-            ("get", 1)              # 获取已删除的会话1失败
+            ("set", 800),             # 为用户789设置会话1
+            ("get", 800),             # 获取会话1成功
+            ("set_with_uid", 800, 101),     # 为用户101设置会话2
+            ("get", 800),             # 获取会话1成功
+            ("switch", 800, 1),       # 切换到会话2，参数为索引
+            ("get", 800),             # 获取会话2成功
+            ("delete", 800),          # 删除会话2
+            ("switch", 800, 0),       # 切换回会话1，参数为索引
+            ("get", 800),             # 获取会话1成功
+            ("delete", 800),          # 删除会话1
+            ("get", 1301)              # 获取已删除的会话1失败
         ],
         id="multiple_user_sessions"
     ),
@@ -85,12 +85,12 @@ SESSION_LIFECYCLE_SCENARIOS = [
         "session_reset_scenario",
         202,
         [
-            ("set", 0),             # 设置会话成功
-            ("get", 0),             # 获取会话成功
-            ("reload", 0),          # 重新加载服务配置
-            ("get", 0),             # 验证重新加载后会话仍存在
-            ("delete", 0),          # 删除会话
-            ("get", 1)              # 获取已删除会话应失败
+            ("set", 800),             # 设置会话成功
+            ("get", 800),             # 获取会话成功
+            ("reload", 800),          # 重新加载服务配置
+            ("get", 800),             # 验证重新加载后会话仍存在
+            ("delete", 800),          # 删除会话
+            ("get", 1301)              # 获取已删除会话应失败
         ],
         id="session_reset_scenario"
     ),
@@ -120,7 +120,7 @@ async def test_set_session(client: SessionClient, uid: int, expected_code: int):
     result = await client.set_session(uid)
     assert result[0] == expected_code, f"设置会话应返回状态码 {expected_code}，但得到 {result[0]}"
 
-    if expected_code == 0:
+    if expected_code == 800:
         # 如果预期成功，确认会话ID不为空
         assert result[1], "成功设置会话应返回有效会话ID"
 
@@ -130,15 +130,15 @@ async def test_set_session(client: SessionClient, uid: int, expected_code: int):
 async def test_get_session(client: SessionClient, session_id: str, expected_code: int, expected_uid: int):
     """测试获取会话，使用参数化测试"""
     # 对于有效会话用例，先创建一个会话
-    if session_id == "valid_session" and expected_code == 0:
+    if session_id == "valid_session" and expected_code == 800:
         set_result = await client.set_session(expected_uid)
-        assert set_result[0] == 0, "设置会话失败，无法继续测试获取会话"
+        assert set_result[0] == 800, "设置会话失败，无法继续测试获取会话"
         session_id = set_result[1]  # 使用真实的会话ID
 
     result = await client.get_session(session_id)
     assert result[0] == expected_code, f"获取会话应返回状态码 {expected_code}，但得到 {result[0]}"
 
-    if expected_code == 0:
+    if expected_code == 800:
         assert result[1] == expected_uid, f"获取会话应返回UID {expected_uid}，但得到 {result[1]}"
 
 
@@ -149,7 +149,7 @@ async def test_delete_session(client: SessionClient, session_id: str, expected_c
     # 对于有效会话用例，先创建一个会话
     if session_id == "valid_session":
         set_result = await client.set_session(123)
-        assert set_result[0] == 0, "设置会话失败，无法继续测试删除会话"
+        assert set_result[0] == 800, "设置会话失败，无法继续测试删除会话"
         session_id = set_result[1]  # 使用真实的会话ID
 
     result = await client.delete_session(session_id)
@@ -201,7 +201,7 @@ async def test_session_lifecycle_scenarios(client: SessionClient, scenario_name:
                 result = await client.get_session(session_id)
                 assert result[0] == expected_code, f"获取会话应返回状态码 {expected_code}，但得到 {result[0]}"
 
-                if expected_code == 0:
+                if expected_code == 800:
                     # 确认UID - 检查当前操作的是哪个用户的会话
                     expected_uid = uid
                     if scenario_name == "multiple_user_sessions" and current_session_index == 1:
@@ -244,4 +244,4 @@ async def test_session_lifecycle_scenarios(client: SessionClient, scenario_name:
 @pytest.mark.asyncio
 async def test_reload_service(client: SessionClient):
     """测试服务重载功能"""
-    assert await client.reload_service() == 0, "重载服务应成功"
+    assert await client.reload_service() == 800, "重载服务应成功"
